@@ -1,0 +1,7 @@
+
+razlika između
+----------------------
+socket.emit
+socket.broadcast.emmit
+io.emit
+

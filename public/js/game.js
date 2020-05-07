@@ -6,7 +6,7 @@ const config = {
   physics: {
     default: 'Arcade',
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 0 }
     }
   },
@@ -129,8 +129,11 @@ function create() {
     '06'
   ];
 
+  const sirinaDomine = 40;
+  const visinaDomine = 79;
+
   // niz izmešanih brojeva od 0 do 27
-  const slobodneDomine = shuffledDominos();
+  const slobodneDomine = randomUniqueNumbers(28);
 
   // različiti brojevi od 0 do 27 (indeks niza oznakeDomina)
   domineIgraca = podeliDomine(slobodneDomine, 22);
@@ -145,9 +148,9 @@ function create() {
 
   for (let i = 0; i < domineIgraca.length; i++) {
     let domina = this.physics.add
-      .sprite(10 + i * 40, 400, 'domine', domineIgraca[i])
+      .sprite(10 + i * 40, 550, 'domine', domineIgraca[i])
       .setInteractive();
-    domina.setDisplaySize(40, 79);
+    domina.setDisplaySize(sirinaDomine, visinaDomine);
     //domina.setAngle(90);
     this.input.setDraggable(domina);
     domina.status = defaultStatus(domineIgraca[i], oznakeDomina);
@@ -179,11 +182,15 @@ function create() {
 
   for (let i = 0; i < poredjaneDomine.length; i++) {
     let domina = this.physics.add
-      .sprite(100 + i * 120, 100 + i * 55, 'domine', poredjaneDomine[i])
+      .sprite(100 + i * 130, 100 + i * 60, 'domine', poredjaneDomine[i])
       .setInteractive();
-    domina.setDisplaySize(40, 79);
+    domina.setDisplaySize(sirinaDomine, visinaDomine);
     domina.status = defaultStatus(poredjaneDomine[i], oznakeDomina);
+    //initDomina(domina, sirinaDomine, visinaDomine, poredjaneDomine[i])
+    //======================================
     rotirajDominu(domina);
+    //======================================
+
     this.grupaPoredjaneDomine.add(domina);
   }
 
@@ -191,7 +198,7 @@ function create() {
   this.physics.add.overlap(
     this.grupaPoredjaneDomine,
     grupaDomineIgraca,
-    spojDomine,
+    dodirDomina,
     null,
     this
   );
@@ -204,6 +211,7 @@ function create() {
   this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
     gameObject.x = dragX;
     gameObject.y = dragY;
+    gameObject.setTint(0xffffff);
   });
 
   this.input.on('dragend', function(pointer, gameObject) {
@@ -322,7 +330,8 @@ function rotirajDominu(domina) {
   console.log(domina.angle);
 }
 
-function spojDomine(poredjana, igraceva) {
+function dodirDomina(poredjana, igraceva) {
+  let selfie = this;
   // sa koje strane stavljamo dominu
   let postavljanje;
   let dx = igraceva.x - poredjana.x;
@@ -343,10 +352,97 @@ function spojDomine(poredjana, igraceva) {
   let pdo = poredjana.status[2]; // dole
   let ple = poredjana.status[3]; // levo
   let pori = poredjana.status[4]; // orijentacija
+
+  // horizontalna postavljena i igračeva vertikalna
+  if (pori === 'h' && iori === 'v') {
+    if (postavljanje === 'desno') {
+      dx = 59;
+      if (pde === ido && pde === igo) {
+        dy = 0;
+        fiksiraj(dx, dy, 1, 3);
+      }
+      if (pde === ido && pde !== igo) {
+        dy = -20;
+        fiksiraj(dx, dy, 1, 2);
+      }
+      if (pde === igo && pde !== ido) {
+        dy = 20;
+        fiksiraj(dx, dy, 1, 0);
+      }
+    }
+    if (postavljanje === 'levo') {
+      dx = -59;
+      if (ple === ido && ple === igo) {
+        dy = 0;
+        fiksiraj(dx, dy, 3, 1);
+      }
+      if (ple === igo && ple !== ido) {
+        dy = 20;
+        fiksiraj(dx, dy, 3, 0);
+      }
+      if (ple === ido && ple !== igo) {
+        dy = -20;
+        fiksiraj(dx, dy, 3, 2);
+      }
+    }
+    if (postavljanje === 'gore') {
+      dx = 0;
+      if (pgo !== '-' && ple === ido && pde === ido) {
+        dy = -59;
+        fiksiraj(dx, dy, 0, 2);
+      }
+    }
+    if (postavljanje === 'dole') {
+      dx = 0;
+      if (pdo !== '-' && pde === igo && ple === igo) {
+        dy = 59;
+        fiksiraj(dx, dy, 2, 0);
+      }
+    }
+  }
+  // horizontalna postavljena i igračeva
+  if (pori === 'h' && iori === 'h') {
+    dy = 0;
+    if (postavljanje === 'desno') {
+      if (pde === ile) {
+        dx = 78;
+        fiksiraj(dx, dy, 1, 3);
+      }
+    }
+    if (postavljanje === 'levo') {
+      if (ple === ide) {
+        dx = -78;
+        fiksiraj(dx, dy, 3, 1);
+      }
+    }
+  }
+
+  function fiksiraj(dex, dey, pstatus, istatus) {
+    igraceva.x = poredjana.x + dex;
+    igraceva.y = poredjana.y + dey;
+    let pointer = selfie.input.activePointer;
+
+    if (pointer.isDown) {
+      igraceva.setTint(0xaaffaa);
+    } else {
+      dodatniPomerajx = Math.abs(dex) > Math.abs(dey) ? Math.sign(dex) * 2 : 0;
+      dodatniPomerajy = Math.abs(dex) < Math.abs(dey) ? Math.sign(dey) * 2 : 0;
+      igraceva.x = poredjana.x + dex + dodatniPomerajx;
+      igraceva.y = poredjana.y + dey + dodatniPomerajy;
+      poredjana.status = poredjana.status.replaceAt(pstatus, '-');
+      igraceva.status = igraceva.status.replaceAt(istatus, '-');
+      postaviDominuNaSto(igraceva, domineIgraca, selfie.grupaPoredjaneDomine);
+      console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
+      console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
+    }
+  }
+
+  /*
   if (postavljanje === 'dole' && pdo === igo) {
+    //
     console.log('MOŽE!');
     if (pori === 'h' && iori === 'v') {
-      // pripajamo uspravnu dominu odozdo na horizontalnu dominu
+      // pripajamo vertikalnu dominu odozdo na horizontalnu dominu
       igraceva.x = poredjana.x;
       igraceva.y = poredjana.y + 59;
       let pointer = this.input.activePointer;
@@ -354,15 +450,14 @@ function spojDomine(poredjana, igraceva) {
       if (pointer.isDown) {
       } else {
         // pointer.isUp
-        igraceva.y = poredjana.y + 60;
+        igraceva.y = poredjana.y + 61;
         igraceva.status = igraceva.status.replaceAt(0, '-');
         poredjana.status = poredjana.status.replaceAt(2, '-');
         postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
       }
     }
     if (pori === 'v' && iori === 'v') {
-      console.log('drugi slucaj');
-      // pripajamo uspravnu dominu odozdo na vertikalnu dominu
+      // pripajamo vertikalnu dominu odozdo na vertikalnu dominu
       igraceva.x = poredjana.x;
       igraceva.y = poredjana.y + 78;
       let pointer = this.input.activePointer;
@@ -370,14 +465,80 @@ function spojDomine(poredjana, igraceva) {
       if (pointer.isDown) {
       } else {
         // pointer.isUp
-        igraceva.y = poredjana.y + 79;
+        igraceva.y = poredjana.y + 80;
         igraceva.status = igraceva.status.replaceAt(0, '-');
         poredjana.status = poredjana.status.replaceAt(2, '-');
-
+        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
+      }
+    }
+    if (pori === 'v' && iori === 'h') {
+      // pripajamo horizontalnu dominu odozdo na vertikalnu dominu
+      igraceva.x = poredjana.x;
+      igraceva.y = poredjana.y + 59;
+      let pointer = this.input.activePointer;
+      //ako ne držimo dugme miša, domina će se fiksirati na mesto
+      if (pointer.isDown) {
+      } else {
+        // pointer.isUp
+        igraceva.y = poredjana.y + 61;
+        igraceva.status = igraceva.status.replaceAt(0, '-');
+        poredjana.status = poredjana.status.replaceAt(2, '-');
         postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
       }
     }
   }
+
+  if (postavljanje === 'desno' && pde === ile) {
+    console.log('MOŽE!');
+    if (pori === 'h' && iori === 'v') {
+      // pripajamo uspravnu dominu s desne strane horizontalne domine
+      igraceva.x = poredjana.x + 59;
+      igraceva.y = poredjana.y;
+      let pointer = this.input.activePointer;
+      //ako ne držimo dugme miša, domina će se fiksirati na mesto
+      if (pointer.isDown) {
+      } else {
+        // pointer.isUp
+        igraceva.x = poredjana.x + 61;
+        igraceva.status = igraceva.status.replaceAt(3, '-');
+        poredjana.status = poredjana.status.replaceAt(1, '-');
+        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
+      }
+    }
+    if (pori === 'v' && iori === 'h') {
+      console.log('drugi slucaj');
+      // pripajamo horizontalnu dominu s desne strane uspravne domine
+      igraceva.x = poredjana.x + 59;
+      igraceva.y = poredjana.y;
+      let pointer = this.input.activePointer;
+      //ako ne držimo dugme miša, domina će se fiksirati na mesto
+      if (pointer.isDown) {
+      } else {
+        // pointer.isUp
+        igraceva.x = poredjana.x + 61;
+        igraceva.status = igraceva.status.replaceAt(3, '-');
+        poredjana.status = poredjana.status.replaceAt(1, '-');
+        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
+      }
+    }
+    if (pori === 'h' && iori === 'h') {
+      console.log('treci slucaj');
+      // pripajamo horizontalnu dominu s desne strane horizontalne domine
+      igraceva.x = poredjana.x + 78;
+      igraceva.y = poredjana.y;
+      let pointer = this.input.activePointer;
+      //ako ne držimo dugme miša, domina će se fiksirati na mesto
+      if (pointer.isDown) {
+      } else {
+        // pointer.isUp
+        igraceva.x = poredjana.x + 80;
+        igraceva.status = igraceva.status.replaceAt(3, '-');
+        poredjana.status = poredjana.status.replaceAt(1, '-');
+        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
+      }
+    }
+  }
+  */
 }
 
 String.prototype.replaceAt = function(index, replacement) {
@@ -388,6 +549,7 @@ String.prototype.replaceAt = function(index, replacement) {
 };
 
 function postaviDominuNaSto(domina, nizDomineIgraca, grupa) {
+  domina.setTint(0xffffff);
   // ne može više da se pomera
   domina.disableInteractive();
   // broj domine se prebacuje sa igrača na domine na stolu
@@ -395,14 +557,13 @@ function postaviDominuNaSto(domina, nizDomineIgraca, grupa) {
   nizDomineIgraca.splice(nizDomineIgraca.indexOf(domina.indeks), 1);
   // i dodaje u grupu sprajtova domina na stolu
   grupa.add(domina);
-
   console.log(poredjaneDomine);
-  console.log(domineIgraca);
+  console.log(nizDomineIgraca);
 }
 
-function shuffledDominos() {
+function randomUniqueNumbers(numberOfElements) {
   const array = [];
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < numberOfElements; i++) {
     array.push(i);
   }
   // Fisher-Yates shuffle

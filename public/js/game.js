@@ -19,6 +19,8 @@ const config = {
 
 const game = new Phaser.Game(config);
 
+let name = prompt('Unesite ime:', '');
+
 let poredjaneDomine = [];
 let domineIgraca = [];
 
@@ -50,6 +52,13 @@ function create() {
   });
   this.socket.on('newPlayer', playerInfo => {
     addOtherPlayers(self, playerInfo);
+  });
+  this.socket.on('playerId', id => {
+    console.log(name + ' id je ' + id);
+  });
+  this.socket.on('connect', data => {
+    console.log('u klijentu, saljem name ' + name);
+    this.socket.emit('playerName', name);
   });
   this.socket.on('disconnect', playerId => {
     self.otherPlayers.getChildren().forEach(otherPlayer => {
@@ -215,9 +224,9 @@ function create() {
   });
 
   this.input.on('dragend', function(pointer, gameObject) {
-    console.log('status: ' + gameObject.status);
-    console.log('start: ' + gameObject.startx + '.' + gameObject.starty);
-    console.log('end: ' + gameObject.x + '.' + gameObject.y);
+    // console.log('status: ' + gameObject.status);
+    // console.log('start: ' + gameObject.startx + '.' + gameObject.starty);
+    // console.log('end: ' + gameObject.x + '.' + gameObject.y);
     // ako nije pomerana domina, rotiraj je
     if (
       gameObject.x === gameObject.startx &&
@@ -303,12 +312,12 @@ function defaultStatus(index, oznakeDomina) {
 }
 
 function rotirajDominu(domina) {
-  console.log('domina status u fji: ' + domina.status);
-  console.log(domina.status[2].toString());
-  console.log(domina.status[3].toString());
-  console.log(domina.status[1].toString());
-  console.log(domina.status[0].toString());
-  console.log(domina.status[4] === 'v' ? 'h' : 'v');
+  // console.log('domina status u fji: ' + domina.status);
+  // console.log(domina.status[2].toString());
+  // console.log(domina.status[3].toString());
+  // console.log(domina.status[1].toString());
+  // console.log(domina.status[0].toString());
+  // console.log(domina.status[4] === 'v' ? 'h' : 'v');
   let noviStatus = '';
   let orijentacija;
   if (domina.status[4] === 'v') {
@@ -324,10 +333,10 @@ function rotirajDominu(domina) {
   noviStatus =
     domina.status[3].toString() + domina.status.slice(0, 3) + orijentacija;
 
-  console.log(noviStatus);
+  //console.log(noviStatus);
 
   domina.status = noviStatus;
-  console.log(domina.angle);
+  //console.log(domina.angle);
 }
 
 function dodirDomina(poredjana, igraceva) {
@@ -432,8 +441,8 @@ function dodirDomina(poredjana, igraceva) {
       poredjana.status = poredjana.status.replaceAt(pstatus, '-');
       igraceva.status = igraceva.status.replaceAt(istatus, '-');
       postaviDominuNaSto(igraceva, domineIgraca, selfie.grupaPoredjaneDomine);
-      console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
-      console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
+      // console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
+      // console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
     }
   }
 
@@ -557,8 +566,8 @@ function postaviDominuNaSto(domina, nizDomineIgraca, grupa) {
   nizDomineIgraca.splice(nizDomineIgraca.indexOf(domina.indeks), 1);
   // i dodaje u grupu sprajtova domina na stolu
   grupa.add(domina);
-  console.log(poredjaneDomine);
-  console.log(nizDomineIgraca);
+  // console.log(poredjaneDomine);
+  // console.log(nizDomineIgraca);
 }
 
 function randomUniqueNumbers(numberOfElements) {
@@ -599,6 +608,7 @@ function addPlayer(self, playerInfo) {
 }
 
 function addOtherPlayers(self, playerInfo) {
+  //let name = prompt('Unesite ime:', 'Player ');
   const otherPlayer = self.add
     .sprite(playerInfo.x, playerInfo.y, 'otherPlayer')
     .setOrigin(0.5, 0.5)
@@ -609,5 +619,7 @@ function addOtherPlayers(self, playerInfo) {
     otherPlayer.setTint(0xff0000);
   }
   otherPlayer.playerId = playerInfo.playerId;
+
+  otherPlayer.name = name;
   self.otherPlayers.add(otherPlayer);
 }

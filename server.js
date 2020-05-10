@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io').listen(server);
+const path = require('path');
 
 let players = {};
 let star = {
@@ -15,8 +16,13 @@ let scores = {
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', (req, res, next) => {
-  res.sendFile(__dirname + '/index.html');
+app.get('/domine', (req, res, next) => {
+  //res.sendFile(__dirname + '/index.html');
+
+  const p = path.join(__dirname, 'public', 'index.html');
+  console.log(p);
+
+  res.sendFile(p);
 });
 
 io.on('connection', socket => {
@@ -29,8 +35,12 @@ io.on('connection', socket => {
     playerId: socket.id,
     team: Math.floor(Math.random() * 2) == 0 ? 'red' : 'blue'
   };
-
-  console.log(players[socket.id]);
+  socket.on('playerName', name => {
+    players[socket.id].name = name;
+    console.log(name);
+    socket.emit('playerId', socket.id);
+    console.log(players);
+  });
 
   // send players object to new player
   socket.emit('currentPlayers', players);
@@ -42,7 +52,9 @@ io.on('connection', socket => {
   socket.broadcast.emit('newPlayer', players[socket.id]);
 
   socket.on('disconnect', () => {
-    console.log('User ' + socket.id + ' disconnected.');
+    console.log(
+      'User ' + socket.id + '(' + players[socket.id].name + ') disconnected.'
+    );
     // remove this player from players object
     delete players[socket.id];
     // emmit a message to all players to remove this player

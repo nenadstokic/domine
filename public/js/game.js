@@ -107,37 +107,6 @@ function create() {
     );
   });
 
-  const oznakeDomina = [
-    '00',
-    '11',
-    '01',
-    '22',
-    '12',
-    '02',
-    '33',
-    '23',
-    '13',
-    '03',
-    '44',
-    '34',
-    '24',
-    '14',
-    '04',
-    '55',
-    '45',
-    '35',
-    '25',
-    '15',
-    '05',
-    '66',
-    '56',
-    '46',
-    '36',
-    '26',
-    '16',
-    '06'
-  ];
-
   const sirinaDomine = 40;
   const visinaDomine = 79;
 
@@ -162,7 +131,7 @@ function create() {
     domina.setDisplaySize(sirinaDomine, visinaDomine);
     //domina.setAngle(90);
     this.input.setDraggable(domina);
-    domina.status = defaultStatus(domineIgraca[i], oznakeDomina);
+    domina.status = defaultStatus(domineIgraca[i]);
     domina.indeks = domineIgraca[i];
 
     grupaDomineIgraca.add(domina);
@@ -194,7 +163,7 @@ function create() {
       .sprite(100 + i * 130, 100 + i * 60, 'domine', poredjaneDomine[i])
       .setInteractive();
     domina.setDisplaySize(sirinaDomine, visinaDomine);
-    domina.status = defaultStatus(poredjaneDomine[i], oznakeDomina);
+    domina.status = defaultStatus(poredjaneDomine[i]);
     //initDomina(domina, sirinaDomine, visinaDomine, poredjaneDomine[i])
     //======================================
     rotirajDominu(domina);
@@ -291,7 +260,37 @@ function update() {
   }
 }
 
-function defaultStatus(index, oznakeDomina) {
+function defaultStatus(index) {
+  const oznakeDomina = [
+    '00',
+    '11',
+    '01',
+    '22',
+    '12',
+    '02',
+    '33',
+    '23',
+    '13',
+    '03',
+    '44',
+    '34',
+    '24',
+    '14',
+    '04',
+    '55',
+    '45',
+    '35',
+    '25',
+    '15',
+    '05',
+    '66',
+    '56',
+    '46',
+    '36',
+    '26',
+    '16',
+    '06'
+  ];
   let status = '----v';
   if (
     ['00', '11', '22', '33', '44', '55', '66'].includes(

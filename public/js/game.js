@@ -53,7 +53,7 @@ function create() {
   this.socket = io();
   this.otherPlayers = this.physics.add.group();
   this.socket.on('currentPlayers', players => {
-    console.log('curentPlayers event happened');
+    // console.log('curentPlayers event happened');
 
     Object.keys(players).forEach(id => {
       if (id === self.socket.id) {
@@ -62,8 +62,8 @@ function create() {
         addOtherPlayers(self, players[id]);
       }
     });
-    console.log('players: ');
-    console.log(players);
+    // console.log('players: ');
+    // console.log(players);
   });
 
   this.socket.on('newPlayer', playerInfo => {
@@ -71,7 +71,7 @@ function create() {
   });
 
   this.socket.on('playerId', id => {
-    console.log(name + ' id je ' + id);
+    //console.log(name + ' id je ' + id);
   });
 
   this.socket.on('connect', data => {
@@ -134,8 +134,8 @@ function create() {
   const domineIgraca2 = podeliDomine(slobodneDomine, 1);
   poredjaneDomine = podeliDomine(slobodneDomine, 5);
 
-  console.log(domineIgraca);
-  console.log(poredjaneDomine);
+  // console.log(domineIgraca);
+  //console.log(poredjaneDomine);
   //console.log(slobodneDomine);
 
   grupaDomineIgraca = this.add.group();
@@ -147,14 +147,14 @@ function create() {
 
     let dw = domina.body.width;
     let dh = domina.body.height;
-    console.log('dw i dh pre setDisplaySize-a: ' + dw + ' ' + dh);
+    //console.log('dw i dh pre setDisplaySize-a: ' + dw + ' ' + dh);
 
     domina.setDisplaySize(sirinaDomine, visinaDomine);
     domina.body.setSize(sirinaDomine * ratiox, visinaDomine * ratioy);
 
     dw = domina.body.width;
     dh = domina.body.height;
-    console.log('dw i dh posle setDisplaySize-a: ' + dw + ' ' + dh);
+    //console.log('dw i dh posle setDisplaySize-a: ' + dw + ' ' + dh);
 
     //domina.setAngle(90);
     this.input.setDraggable(domina);
@@ -338,7 +338,7 @@ function defaultStatus(index) {
 }
 
 function rotirajDominu(domina) {
-  console.log('status pre rotacije: ' + domina.status);
+  // console.log('status pre rotacije: ' + domina.status);
 
   let noviStatus = '';
   let orijentacija;
@@ -346,8 +346,8 @@ function rotirajDominu(domina) {
   let dw = domina.body.width;
   let dh = domina.body.height;
 
-  console.log(visinaDomine, sirinaDomine);
-  console.log('dw i dh ' + dw + ' ' + dh);
+  // console.log(visinaDomine, sirinaDomine);
+  // console.log('dw i dh ' + dw + ' ' + dh);
 
   let ugao = domina.angle + 90;
   domina.setAngle(ugao);
@@ -538,8 +538,8 @@ function dodirDomina(poredjana, igraceva) {
       poredjana.status = poredjana.status.replaceAt(pstatus, 'c');
       igraceva.status = igraceva.status.replaceAt(istatus, 'c');
       postaviDominuNaSto(igraceva, domineIgraca, selfie.grupaPoredjaneDomine);
-      console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
-      console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
+      // console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
+      //  console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
     }
   }
 }
@@ -560,8 +560,8 @@ function postaviDominuNaSto(domina, nizDomineIgraca, grupa) {
   nizDomineIgraca.splice(nizDomineIgraca.indexOf(domina.indeks), 1);
   // i dodaje u grupu sprajtova domina na stolu
   grupa.add(domina);
-  console.log(poredjaneDomine);
-  console.log(nizDomineIgraca);
+  //  console.log(poredjaneDomine);
+  //  console.log(nizDomineIgraca);
 }
 
 function randomUniqueNumbers(numberOfElements) {
@@ -598,7 +598,7 @@ function addPlayer(self, playerInfo) {
   self.ship.setDrag(100);
   self.ship.setAngularDrag(100);
   self.ship.setMaxVelocity(200);
-  console.log('added ' + playerInfo.team + ' ' + playerInfo.playerId);
+  // console.log('added ' + playerInfo.team + ' ' + playerInfo.playerId);
 }
 
 function addOtherPlayers(self, playerInfo) {
@@ -616,6 +616,6 @@ function addOtherPlayers(self, playerInfo) {
 
   otherPlayer.name = name;
   self.otherPlayers.add(otherPlayer);
-  console.log('self.otherPlayers');
-  console.log(self.otherPlayers);
+  // console.log('self.otherPlayers');
+  // console.log(self.otherPlayers);
 }

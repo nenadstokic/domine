@@ -1,8 +1,8 @@
 const config = {
   type: Phaser.AUTO,
   parent: 'phaser-example',
-  width: 800,
-  height: 600,
+  width: 1200,
+  height: 700,
   physics: {
     default: 'Arcade',
     arcade: {
@@ -24,13 +24,22 @@ let name = prompt('Unesite ime:', '');
 let poredjaneDomine = [];
 let domineIgraca = [];
 
+const frameWidth = 80;
+const frameHeight = 158;
+
+const sirinaDomine = 40; // 40 def
+const visinaDomine = 80; // 79 def
+
+const ratiox = frameWidth / sirinaDomine;
+const ratioy = frameHeight / visinaDomine;
+
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
   this.load.image('otherPlayer', 'assets/enemyBlack5.png');
   this.load.image('star', 'assets/star_gold.png');
   this.load.spritesheet('domine', 'assets/domine2240x158.png', {
-    frameWidth: 80,
-    frameHeight: 158
+    frameWidth: frameWidth,
+    frameHeight: frameHeight
   });
 }
 
@@ -107,9 +116,6 @@ function create() {
     );
   });
 
-  const sirinaDomine = 40;
-  const visinaDomine = 79;
-
   // niz izmešanih brojeva od 0 do 27
   const slobodneDomine = randomUniqueNumbers(28);
 
@@ -126,9 +132,20 @@ function create() {
 
   for (let i = 0; i < domineIgraca.length; i++) {
     let domina = this.physics.add
-      .sprite(10 + i * 40, 550, 'domine', domineIgraca[i])
+      .sprite(10 + i * sirinaDomine, 550, 'domine', domineIgraca[i])
       .setInteractive();
+
+    let dw = domina.body.width;
+    let dh = domina.body.height;
+    console.log('dw i dh pre setDisplaySize-a: ' + dw + ' ' + dh);
+
     domina.setDisplaySize(sirinaDomine, visinaDomine);
+    domina.body.setSize(sirinaDomine * ratiox, visinaDomine * ratioy);
+
+    dw = domina.body.width;
+    dh = domina.body.height;
+    console.log('dw i dh posle setDisplaySize-a: ' + dw + ' ' + dh);
+
     //domina.setAngle(90);
     this.input.setDraggable(domina);
     domina.status = defaultStatus(domineIgraca[i]);
@@ -291,47 +308,56 @@ function defaultStatus(index) {
     '16',
     '06'
   ];
-  let status = '----v';
+  let status = '----voooo'; // - = no number, v = vertical, h = horizontal, o = open, c = closed
   if (
     ['00', '11', '22', '33', '44', '55', '66'].includes(
       oznakeDomina[index].toString()
     )
   ) {
     status =
-      oznakeDomina[index].toString() + oznakeDomina[index].toString() + 'v';
+      oznakeDomina[index].toString() + oznakeDomina[index].toString() + 'voooo';
   } else {
     status =
       oznakeDomina[index][0].toString() +
       '-' +
       oznakeDomina[index][1].toString() +
       '-' +
-      'v';
+      'voooo';
   }
   return status;
 }
 
 function rotirajDominu(domina) {
-  // console.log('domina status u fji: ' + domina.status);
-  // console.log(domina.status[2].toString());
-  // console.log(domina.status[3].toString());
-  // console.log(domina.status[1].toString());
-  // console.log(domina.status[0].toString());
-  // console.log(domina.status[4] === 'v' ? 'h' : 'v');
+  console.log('status pre rotacije: ' + domina.status);
+
   let noviStatus = '';
   let orijentacija;
-  if (domina.status[4] === 'v') {
-    orijentacija = 'h';
-    domina.body.setSize(158, 80); // OVO JE POTREBNO ZBOG KOLIZIJE KADA SE DOMINA ZAROTIRA ZA 90 STEPENI
-  } else {
-    orijentacija = 'v';
-    domina.body.setSize(80, 158); // I KADA SE VRSTI U USPRAVAN POLOŽAJ
-  }
+
+  let dw = domina.body.width;
+  let dh = domina.body.height;
+
+  console.log(visinaDomine, sirinaDomine);
+  console.log('dw i dh ' + dw + ' ' + dh);
+
   let ugao = domina.angle + 90;
   domina.setAngle(ugao);
 
-  noviStatus =
-    domina.status[3].toString() + domina.status.slice(0, 3) + orijentacija;
+  if (domina.status[4] === 'v') {
+    orijentacija = 'h';
+    //domina.body.setSize(frameHeight / ratioy, frameWidth / ratiox);
+    domina.body.setSize(visinaDomine * ratiox, sirinaDomine * ratioy); // OVO JE POTREBNO ZBOG KOLIZIJE KADA SE DOMINA ZAROTIRA ZA 90 STEPENI
+  } else {
+    orijentacija = 'v';
+    domina.body.setSize(sirinaDomine * ratiox, visinaDomine * ratioy);
+    //domina.body.setSize(sirinaDomine, visinaDomine); // I KADA SE VRSTI U USPRAVAN POLOŽAJ
+  }
 
+  noviStatus =
+    domina.status[3].toString() +
+    domina.status.slice(0, 3) +
+    orijentacija +
+    domina.status[8].toString() +
+    domina.status.slice(5, 8);
   //console.log(noviStatus);
 
   domina.status = noviStatus;
@@ -361,66 +387,128 @@ function dodirDomina(poredjana, igraceva) {
   let ple = poredjana.status[3]; // levo
   let pori = poredjana.status[4]; // orijentacija
 
+  let pstago = poredjana.status[5]; // poredjana domina gore
+  let pstade = poredjana.status[6]; // desno
+  let pstado = poredjana.status[7]; // dole
+  let pstale = poredjana.status[8]; // levo
+
   // horizontalna postavljena i igračeva vertikalna
   if (pori === 'h' && iori === 'v') {
-    if (postavljanje === 'desno') {
-      dx = 59;
+    if (postavljanje === 'desno' && pstade === 'o') {
+      dx = Math.round(visinaDomine / 2 + sirinaDomine / 2) - 1;
       if (pde === ido && pde === igo) {
-        dy = 0;
-        fiksiraj(dx, dy, 1, 3);
+        fiksiraj(dx, 0, 6, 8);
       }
       if (pde === ido && pde !== igo) {
-        dy = -20;
-        fiksiraj(dx, dy, 1, 2);
+        dy = -sirinaDomine / 2;
+        fiksiraj(dx, dy, 6, 7);
       }
       if (pde === igo && pde !== ido) {
-        dy = 20;
-        fiksiraj(dx, dy, 1, 0);
+        dy = sirinaDomine / 2;
+        fiksiraj(dx, dy, 6, 5);
       }
     }
-    if (postavljanje === 'levo') {
-      dx = -59;
+    if (postavljanje === 'levo' && pstale === 'o') {
+      dx = Math.round(-(visinaDomine / 2 + sirinaDomine / 2)) + 1;
       if (ple === ido && ple === igo) {
-        dy = 0;
-        fiksiraj(dx, dy, 3, 1);
+        fiksiraj(dx, 0, 8, 6);
       }
       if (ple === igo && ple !== ido) {
-        dy = 20;
-        fiksiraj(dx, dy, 3, 0);
+        dy = sirinaDomine / 2;
+        fiksiraj(dx, dy, 8, 5);
       }
       if (ple === ido && ple !== igo) {
-        dy = -20;
-        fiksiraj(dx, dy, 3, 2);
+        dy = -(sirinaDomine / 2);
+        fiksiraj(dx, dy, 8, 7);
       }
     }
-    if (postavljanje === 'gore') {
-      dx = 0;
-      if (pgo !== '-' && ple === ido && pde === ido) {
-        dy = -59;
-        fiksiraj(dx, dy, 0, 2);
+    if (postavljanje === 'gore' && pstago === 'o') {
+      if (ple === ido && pde === ido) {
+        dy = Math.round(-(visinaDomine / 2 + sirinaDomine / 2) + 1);
+        fiksiraj(0, dy, 5, 7);
       }
     }
-    if (postavljanje === 'dole') {
-      dx = 0;
-      if (pdo !== '-' && pde === igo && ple === igo) {
-        dy = 59;
-        fiksiraj(dx, dy, 2, 0);
+    if (postavljanje === 'dole' && pstado === 'o') {
+      if (pde === igo && ple === igo) {
+        dy = Math.round(visinaDomine / 2 + sirinaDomine / 2) - 1;
+        fiksiraj(0, dy, 7, 5);
       }
     }
   }
-  // horizontalna postavljena i igračeva
-  if (pori === 'h' && iori === 'h') {
-    dy = 0;
-    if (postavljanje === 'desno') {
-      if (pde === ile) {
-        dx = 78;
-        fiksiraj(dx, dy, 1, 3);
+
+  // vertikalna postavljena i horizontalna igračeva
+  if (pori === 'v' && iori === 'h') {
+    if (postavljanje === 'levo') {
+      dx = Math.round(-(visinaDomine / 2 + sirinaDomine / 2)) + 1;
+      if (ide === pdo && ide === pgo && pstale === 'o') {
+        fiksiraj(dx, 0, 8, 6);
+      }
+      if (ide === pdo && ide !== pgo && pstado === 'o') {
+        dy = sirinaDomine / 2;
+        fiksiraj(dx, dy, 7, 6);
+      }
+      if (ide === pgo && ide !== pdo && pstago === 'o') {
+        dy = -(sirinaDomine / 2);
+        fiksiraj(dx, dy, 5, 6);
       }
     }
-    if (postavljanje === 'levo') {
+    if (postavljanje === 'desno') {
+      dx = Math.round(visinaDomine / 2 + sirinaDomine / 2) - 1;
+      if (ile === pdo && ile === pgo && pstade === 'o') {
+        fiksiraj(dx, 0, 6, 8);
+      }
+      if (pgo === ile && pdo !== ile && pstago === 'o') {
+        dy = -sirinaDomine / 2;
+        fiksiraj(dx, dy, 5, 8);
+      }
+      if (pdo === ile && pgo !== ile && pstado === 'o') {
+        dy = sirinaDomine / 2;
+        fiksiraj(dx, dy, 7, 8);
+      }
+    }
+    if (postavljanje === 'dole' && pstado === 'o') {
+      if (ile === pdo && ide === pdo) {
+        dy = Math.round(visinaDomine / 2 + sirinaDomine / 2) - 1;
+        fiksiraj(0, dy, 7, 5);
+      }
+    }
+    if (postavljanje === 'gore' && pstago === 'o') {
+      if (ide === pgo && ile === pgo) {
+        dy = Math.round(-(visinaDomine / 2 + sirinaDomine / 2) + 1);
+        fiksiraj(0, dy, 5, 7);
+      }
+    }
+  }
+
+  // horizontalna postavljena i igračeva
+  if (pori === 'h' && iori === 'h') {
+    if (postavljanje === 'desno' && pstade === 'o') {
+      if (pde === ile) {
+        dx = visinaDomine - 1;
+        fiksiraj(dx, 0, 6, 8);
+      }
+    }
+    if (postavljanje === 'levo' && pstale === 'o') {
       if (ple === ide) {
-        dx = -78;
-        fiksiraj(dx, dy, 3, 1);
+        dx = -(visinaDomine - 1);
+        fiksiraj(dx, 0, 8, 6);
+      }
+    }
+  }
+
+  // vertikalna postavljena i igračeva
+  if (pori === 'v' && iori === 'v') {
+    dx = 0;
+    if (postavljanje === 'dole' && pstado === 'o') {
+      if (pdo === igo) {
+        dy = visinaDomine - 1;
+        fiksiraj(dx, dy, 7, 5);
+      }
+    }
+    if (postavljanje === 'gore' && pstago === 'o') {
+      if (pgo === ido) {
+        dy = -(visinaDomine - 1);
+        fiksiraj(dx, dy, 5, 7);
       }
     }
   }
@@ -437,11 +525,11 @@ function dodirDomina(poredjana, igraceva) {
       dodatniPomerajy = Math.abs(dex) < Math.abs(dey) ? Math.sign(dey) * 2 : 0;
       igraceva.x = poredjana.x + dex + dodatniPomerajx;
       igraceva.y = poredjana.y + dey + dodatniPomerajy;
-      poredjana.status = poredjana.status.replaceAt(pstatus, '-');
-      igraceva.status = igraceva.status.replaceAt(istatus, '-');
+      poredjana.status = poredjana.status.replaceAt(pstatus, 'c');
+      igraceva.status = igraceva.status.replaceAt(istatus, 'c');
       postaviDominuNaSto(igraceva, domineIgraca, selfie.grupaPoredjaneDomine);
-      // console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
-      // console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
+      console.log('status igraceve nakon fiksiranja: ' + igraceva.status);
+      console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
     }
   }
 

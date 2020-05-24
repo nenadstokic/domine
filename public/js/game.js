@@ -19,7 +19,11 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-let name = prompt('Unesite ime:', '');
+// let name = prompt('Unesite ime:', '');
+let wholeDate = new Date();
+let minutes = wholeDate.getMinutes();
+let seconds = wholeDate.getSeconds();
+let playerName = 'Player' + minutes + seconds;
 
 let poredjaneDomine = [];
 let domineIgraca = [];
@@ -28,7 +32,7 @@ const frameWidth = 80;
 const frameHeight = 158;
 
 const sirinaDomine = 40; // 40 def
-const visinaDomine = 80; // 79 def
+const visinaDomine = 79; // 79 def
 
 const ratiox = frameWidth / sirinaDomine;
 const ratioy = frameHeight / visinaDomine;
@@ -58,17 +62,23 @@ function create() {
         addOtherPlayers(self, players[id]);
       }
     });
+    console.log('players: ');
+    console.log(players);
   });
+
   this.socket.on('newPlayer', playerInfo => {
     addOtherPlayers(self, playerInfo);
   });
+
   this.socket.on('playerId', id => {
     console.log(name + ' id je ' + id);
   });
+
   this.socket.on('connect', data => {
-    console.log('u klijentu, saljem name ' + name);
-    this.socket.emit('playerName', name);
+    console.log('u klijentu, saljem name ' + playerName);
+    this.socket.emit('playerName', playerName);
   });
+
   this.socket.on('disconnect', playerId => {
     self.otherPlayers.getChildren().forEach(otherPlayer => {
       if (playerId === otherPlayer.playerId) {
@@ -532,109 +542,6 @@ function dodirDomina(poredjana, igraceva) {
       console.log('status postavljene nakon fiksiranja: ' + poredjana.status);
     }
   }
-
-  /*
-  if (postavljanje === 'dole' && pdo === igo) {
-    //
-    console.log('MOŽE!');
-    if (pori === 'h' && iori === 'v') {
-      // pripajamo vertikalnu dominu odozdo na horizontalnu dominu
-      igraceva.x = poredjana.x;
-      igraceva.y = poredjana.y + 59;
-      let pointer = this.input.activePointer;
-      //ako ne držimo dugme miša, domina će se fiksirati na mesto
-      if (pointer.isDown) {
-      } else {
-        // pointer.isUp
-        igraceva.y = poredjana.y + 61;
-        igraceva.status = igraceva.status.replaceAt(0, '-');
-        poredjana.status = poredjana.status.replaceAt(2, '-');
-        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
-      }
-    }
-    if (pori === 'v' && iori === 'v') {
-      // pripajamo vertikalnu dominu odozdo na vertikalnu dominu
-      igraceva.x = poredjana.x;
-      igraceva.y = poredjana.y + 78;
-      let pointer = this.input.activePointer;
-      //ako ne držimo dugme miša, domina će se fiksirati na mesto
-      if (pointer.isDown) {
-      } else {
-        // pointer.isUp
-        igraceva.y = poredjana.y + 80;
-        igraceva.status = igraceva.status.replaceAt(0, '-');
-        poredjana.status = poredjana.status.replaceAt(2, '-');
-        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
-      }
-    }
-    if (pori === 'v' && iori === 'h') {
-      // pripajamo horizontalnu dominu odozdo na vertikalnu dominu
-      igraceva.x = poredjana.x;
-      igraceva.y = poredjana.y + 59;
-      let pointer = this.input.activePointer;
-      //ako ne držimo dugme miša, domina će se fiksirati na mesto
-      if (pointer.isDown) {
-      } else {
-        // pointer.isUp
-        igraceva.y = poredjana.y + 61;
-        igraceva.status = igraceva.status.replaceAt(0, '-');
-        poredjana.status = poredjana.status.replaceAt(2, '-');
-        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
-      }
-    }
-  }
-
-  if (postavljanje === 'desno' && pde === ile) {
-    console.log('MOŽE!');
-    if (pori === 'h' && iori === 'v') {
-      // pripajamo uspravnu dominu s desne strane horizontalne domine
-      igraceva.x = poredjana.x + 59;
-      igraceva.y = poredjana.y;
-      let pointer = this.input.activePointer;
-      //ako ne držimo dugme miša, domina će se fiksirati na mesto
-      if (pointer.isDown) {
-      } else {
-        // pointer.isUp
-        igraceva.x = poredjana.x + 61;
-        igraceva.status = igraceva.status.replaceAt(3, '-');
-        poredjana.status = poredjana.status.replaceAt(1, '-');
-        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
-      }
-    }
-    if (pori === 'v' && iori === 'h') {
-      console.log('drugi slucaj');
-      // pripajamo horizontalnu dominu s desne strane uspravne domine
-      igraceva.x = poredjana.x + 59;
-      igraceva.y = poredjana.y;
-      let pointer = this.input.activePointer;
-      //ako ne držimo dugme miša, domina će se fiksirati na mesto
-      if (pointer.isDown) {
-      } else {
-        // pointer.isUp
-        igraceva.x = poredjana.x + 61;
-        igraceva.status = igraceva.status.replaceAt(3, '-');
-        poredjana.status = poredjana.status.replaceAt(1, '-');
-        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
-      }
-    }
-    if (pori === 'h' && iori === 'h') {
-      console.log('treci slucaj');
-      // pripajamo horizontalnu dominu s desne strane horizontalne domine
-      igraceva.x = poredjana.x + 78;
-      igraceva.y = poredjana.y;
-      let pointer = this.input.activePointer;
-      //ako ne držimo dugme miša, domina će se fiksirati na mesto
-      if (pointer.isDown) {
-      } else {
-        // pointer.isUp
-        igraceva.x = poredjana.x + 80;
-        igraceva.status = igraceva.status.replaceAt(3, '-');
-        poredjana.status = poredjana.status.replaceAt(1, '-');
-        postaviDominuNaSto(igraceva, domineIgraca, this.grupaPoredjaneDomine);
-      }
-    }
-  }
-  */
 }
 
 String.prototype.replaceAt = function(index, replacement) {
@@ -653,8 +560,8 @@ function postaviDominuNaSto(domina, nizDomineIgraca, grupa) {
   nizDomineIgraca.splice(nizDomineIgraca.indexOf(domina.indeks), 1);
   // i dodaje u grupu sprajtova domina na stolu
   grupa.add(domina);
-  // console.log(poredjaneDomine);
-  // console.log(nizDomineIgraca);
+  console.log(poredjaneDomine);
+  console.log(nizDomineIgraca);
 }
 
 function randomUniqueNumbers(numberOfElements) {
@@ -709,4 +616,6 @@ function addOtherPlayers(self, playerInfo) {
 
   otherPlayer.name = name;
   self.otherPlayers.add(otherPlayer);
+  console.log('self.otherPlayers');
+  console.log(self.otherPlayers);
 }

@@ -37,8 +37,10 @@ io.on('connection', socket => {
   };
   socket.on('playerName', name => {
     players[socket.id].name = name;
-    console.log(name);
+    console.log('name: ' + name);
     socket.emit('playerId', socket.id);
+    console.log('players');
+
     console.log(players);
   });
 
